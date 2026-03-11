@@ -52,6 +52,7 @@ selected_cat = st.sidebar.selectbox("Category", options=sorted(list(cat_map.keys
 selected_type = st.sidebar.selectbox("Payment Type", options=list(type_map.keys()))
 
 # Numerical inputs
+HISTORICAL_AVG_RISK = 0.5473
 st.sidebar.header("Step 3: Constraints")
 scheduled_days = st.sidebar.slider("Scheduled Days", 1, 6, 3)
 price = st.sidebar.number_input("Unit Price ($)", value=150.0)
@@ -69,8 +70,36 @@ predictors = [
     'Shipping_Mode_num', 'Customer_Zipcode_num', 'shipping_day_num', 
     'shipping_month_num', 'Price_Per_Unit', 'Logistics_Corridor_ID'
 ]
-# Create an empty DataFrame with 1 row initialized to zeros or global means
-input_data = pd.DataFrame(np.zeros((1, len(predictors))), columns= predictors)
+
+# Create the input row. 
+# We use Sidebar Variables for user choices and THE MEDIANS for the rest.
+input_values = [
+    scheduled_days,              # User Input
+    benefit,                     # User Input
+    14.0,                        # Median Order_Item_Discount
+    0.1,                         # Median Order_Item_Discount_Rate
+    0.27,                        # Median Order_Item_Profit_Ratio
+    1.0,                         # Median Order_Item_Quantity
+    type_map[selected_type],     # User Input
+    cat_map[selected_cat],       # User Input
+    61.0,                        # Median Customer_City_num
+    1.0,                         # Median Customer_Country_num
+    0.0,                         # Median Customer_Segment_num
+    1.0,                         # Median Customer_State_num
+    3.0,                         # Median Department_Name_num
+    city_map[selected_city],     # User Input
+    18.0,                        # Median Order_Country_num
+    119.0,                       # Median Order_State_num
+    2.0,                         # Median Order_Status_num
+    shipping_mode_map[selected_mode], # User Input
+    176.0,                       # Median Customer_Zipcode_num
+    shipping_day_map[selected_day],   # User Input
+    6.0,                         # Median shipping_month_num
+    price,                       # User Input
+    310.0                        # Median Logistics_Corridor_ID
+]
+
+input_data = pd.DataFrame([input_values], columns=predictors)
 
 # Features from the Streamlit UI inputs
 input_data['Days_for_shipment_scheduled'] = scheduled_days
@@ -106,8 +135,10 @@ if st.button("Analyze Order Risk"):
     col1, col2, col3 = st.columns(3)
 
     with col1:
-        st.metric("Late Risk Probability", f"{prob * 100:.1f}%")
+        # Calculate how much higher/lower this order is compared to the 54.73% baseline
+        risk_diff = (prob - HISTORICAL_AVG_RISK) * 100
 
+        st.metric(label= "Late Risk Probability", value= f"{prob * 100:.1f}%", delta= f"{risk_diff:.1f}% vs. History", delta_color= "inverse") # Red if risk_diff is positive, Green if negative
     with col2:
         if prediction == 1:
             st.error("Status: LATE EXPECTED")
