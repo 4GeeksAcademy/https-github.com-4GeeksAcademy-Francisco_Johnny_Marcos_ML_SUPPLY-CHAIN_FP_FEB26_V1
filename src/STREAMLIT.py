@@ -144,6 +144,7 @@ if st.button("Analyze Order Risk"):
         
     with col2:
         if prediction == 1:
+            st.metric("probability of delay:", f"{prob}")
             st.markdown("<br>", unsafe_allow_html=True) # Adds a HTML break
             st.error("Status: LATE EXPECTED")
         else:
@@ -151,19 +152,22 @@ if st.button("Analyze Order Risk"):
             st.success("Status: ON TIME")
     
     with col3:
-        # Determine logical status based on both CLUSTER and PROBABILITY
-        if cluster == 2 and prob >= 0.5:
+        # Priority 1: High Risk (Probability is high)
+        if prob >= 0.5:
             st.metric("Logistic Profile:", readable_cluster)
-            st.error("Action Required: Reschedule Order")
-        elif (cluster == 0 or cluster == 2) and prob < 0.5:
-            st.metric("Logistic Profile:", readable_cluster)
-            st.success("Risk Mitigated")
-        elif cluster == 0 and prob >= 0.5:
-            st.metric("Logistic Profile:", readable_cluster)
-            st.warning("Action Recommended: Review Buffer")
+            if cluster == 2:
+                st.error("Action Required: Reschedule Order")
+            else:
+                # This catches the Cluster 0 or 1 cases that have high probability
+                st.warning("Action Recommended: Review Buffer")
+        
+        # Priority 2: Low Risk (Probability is low)
         else:
             st.metric("Logistic Profile:", readable_cluster)
-            st.success("Optimal Schedule")
+            if (cluster == 0 or cluster == 2):
+                st.success("Risk Mitigated")
+            else:
+                st.success("Optimal Schedule")
             
     # 8. Interactive Map for company visibility
     st.subheader("Order Location (Puerto Rico Hub)")
@@ -177,23 +181,21 @@ if st.button("Analyze Order Risk"):
     st.divider()
     st.subheader("Strategic Recommendation")
 
-# The Logic: If probability is low, the recommendation is "Maintain".
+    # If the probability is safe, that is the primary recommendation
     if prob < 0.3:
         st.success("No Action Needed")
-        st.write(f"The updated schedule of **{scheduled_days} day(s)** has successfully lower the risk. This order is now save to process.")
-    # If probability is high and it's in the impossible cluster
-    elif cluster == 2:
-        st.error("Action Required: Reschedule Order")
-        st.write(f"The current promise of **{scheduled_days} day(s)** is physically impossible for our current logistics to {selected_city}.")
-        
-        # Calculate the 'Safe' target
-        suggested_days = 4 # Based on Cluster 1 average
-        additional_days = suggested_days - scheduled_days
-        st.info(f"**To move this to 'Low Risk':** Increase 'Scheduled Days' to **{suggested_days}**. "
-                f"This adds {additional_days} day(s) but ensures an 85%+ on-time delivery rate.")
-    elif cluster == 0:
-        st.warning("Action Recommended: Review Buffer")
-        st.write("This order is in the 'Moderate' zone. Adding **1 extra day** would likely shift this into the 'Low Risk' zone.")
+        st.write(f"The updated schedule of **{scheduled_days} day(s)** has successfully lowered the risk. This order is now safe to process.")
+    
+    # If the probability is high, we must suggest a change, even for "Optimal" clusters
+    elif prob >= 0.5:
+        if cluster == 2:
+            st.error("Action Required: Reschedule Order")
+            st.write(f"The current promise of **{scheduled_days} day(s)** is physically impossible for our current logistics to {selected_city}.")
+            st.info(f"**To move this to 'Low Risk':** Increase 'Scheduled Days' to **4**.")
+        else:
+            st.warning("Action Recommended: Increase Buffer")
+            st.write(f"Even though {selected_city} usually performs well, a **{scheduled_days}-day** window is too narrow for this shipping mode.")
+            st.info("Recommendation: Add at least **1 additional day** to the delivery promise.")
     else:
         st.success("Optimal Parameters")
-        st.write("The parameters are efficient. No changes required.")
+        st.write("The current parameters are efficient. No changes required.")
