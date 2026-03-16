@@ -324,24 +324,24 @@ if Customer_Country in country_coords and Order_Country in country_coords:
 
     layer_points = pdk.Layer(
         "ScatterplotLayer",
-        data=map_data,
-        get_position='[lon, lat]',
-        get_radius=250000,
-        get_fill_color='[0,102,255]'
+        data= map_data,
+        get_position= '[lon, lat]',
+        get_radius= 250000,
+        get_fill_color= '[0, 102, 255]'
     )
     layer_arc = pdk.Layer(
         "ArcLayer",
         data=arc,
-        get_source_position='[start_lon,start_lat]',
-        get_target_position='[end_lon,end_lat]',
-        get_source_color=[0,150,255],
-        get_target_color=[255,100,0],
-        get_width=6
+        get_source_position= '[start_lon,start_lat]',
+        get_target_position= '[end_lon,end_lat]',
+        get_source_color= [0,150,255],
+        get_target_color= [255,100,0],
+        get_width= 6
     )
     view_state = pdk.ViewState(
         latitude=(origin[1]+destination[1])/2,
         longitude=(origin[0]+destination[0])/2,
-        zoom=1
+        zoom= 1
     )
     st.pydeck_chart(
         pdk.Deck(
