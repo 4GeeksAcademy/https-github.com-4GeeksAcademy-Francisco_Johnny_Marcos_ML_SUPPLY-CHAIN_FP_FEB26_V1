@@ -326,17 +326,17 @@ if Customer_Country in country_coords and Order_Country in country_coords:
         "ScatterplotLayer",
         data=map_data,
         get_position='[lon, lat]',
-        get_radius=250000,
-        get_fill_color='[0,102,255]'
+        get_radius=7000,
+        get_fill_color='[204, 164, 101]'
     )
     layer_arc = pdk.Layer(
         "ArcLayer",
         data=arc,
         get_source_position='[start_lon,start_lat]',
         get_target_position='[end_lon,end_lat]',
-        get_source_color=[0,150,255],
-        get_target_color=[255,100,0],
-        get_width=6
+        get_source_color=[204, 164, 101],
+        get_target_color=[204, 164, 101],
+        get_width=5
     )
     view_state = pdk.ViewState(
         latitude=(origin[1]+destination[1])/2,
