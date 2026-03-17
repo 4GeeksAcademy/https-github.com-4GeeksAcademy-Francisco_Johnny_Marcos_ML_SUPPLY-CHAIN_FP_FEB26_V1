@@ -31,9 +31,9 @@ We evaluated our supervised model based on its ability to identify "Late Risk" b
 
 | **Metric** | **Score** | **Business Interpretation** |
 | --- | --- | --- |
-| **Accuracy** | 82.4% | "The overall correctness of our ""Late"" vs ""On-Time"" predictions." |
+| **Accuracy** | 82.4% | "The overall correctness of our "Late" vs "On-Time" predictions. |
 | **Recall (Late Class)** | 80.0% | Our ability to catch nearly all at-risk orders before they fail. |
-| **Precision** | 87.0% | "Ensures we aren't ""crying wolf"" and flagging too many safe orders." |
+| **Precision** | 87.0% | Ensures we aren't "crying wolf" and flagging too many safe orders. |
 | **Historical Delta** | +27.7% | Our model's improvement over the 54.7% baseline (random guessing). |
 
 ---
@@ -49,9 +49,9 @@ We evaluated our supervised model based on its ability to identify "Late Risk" b
 
 | **File Name** | **Role** | **Model Type** | **Implementation** |
 | --- | --- | --- | ---
-| supervised_model_final_boost.pkl | **Risk Predictor** | Random Forest | Calculates the probability (%) of a late delivery. |
+| supervised_model_final_boost.pkl | **Risk Predictor** | XGBoost | Calculates the probability (%) of a late delivery. |
 | unsupervised_kmeans_final.pkl | **Profiler** | K-Means | Segments routes into Strategic Risk Clusters. |
-| scaler_WITH_outliers.pkl | **Normalizer** | RobustScaler | "Scales real-time user inputs (Price, Benefit) for the model." |
+| scaler_WITH_outliers.pkl | **Normalizer** | RobustScaler | Scales real-time user inputs (Price, Benefit) for the model. |
 | outliers_dict.jso | **Thresholds** | JSON Map | Stores EDA-defined limits to handle extreme input values. |
 
 ---
