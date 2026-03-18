@@ -267,19 +267,41 @@ if predict_button:
         st.info("**Congrats**: The current scheduling window is optimal. This order is highly likely to meet its deadline.")
     else:
         with st.container():
+            st.divider()
+            st.subheader("Strategic Profile Analysis")
+
+        # If the probability is high, we must suggest a change, even for "Optimal" clusters
+        # Priority 1: High Risk (Probability is high)
+        if prob >= 0.5:
             st.metric("Logistic Profile", readable_cluster)
+            if cluster == 2:
+                st.error("Action Required: Reschedule Order")
+            else:
+                # This catches the Cluster 0 or 1 cases that have high probability
+                st.warning("Action Recommended: Review Buffer")
+
+        # Priority 2: Low Risk (Probability is low)
+        else:
+            if (cluster == 0 or cluster == 2):
+                st.success("Risk Mitigated")
+            else:
+                st.success("Optimal Schedule")
+            # else:
+            #     st.warning("Action Recommended: Increase Buffer")
+            #     st.write(f"Even though {Order_City} usually performs well, a **{Days_for_shipment_scheduled}-day** window is too narrow for this shipping mode.")
+            #     st.info("Recommendation: Add at least **1 additional day** to the delivery promise.")
+
         st.divider()
-        st.subheader("Strategic Recommendation")
+        st.subheader("Check before confirming << the order >>:")
 
         # If the probability is safe, that is the primary recommendation
         if prob < 0.3:
             st.success("No Action Needed")
             st.write(f"The updated schedule of **{Days_for_shipment_scheduled} day(s)** has successfully lowered the risk. This order is now safe to process.")
-        
+    
         # If the probability is high, we must suggest a change, even for "Optimal" clusters
         elif prob >= 0.5:
             if cluster == 2:
-                st.error("Action Required: Reschedule Order")
                 st.write(f"The current promise of **{Days_for_shipment_scheduled} day(s)** is physically impossible for our current logistics to {Order_City}.")
                 st.info(f"**To move this to 'Low Risk':** Increase 'Scheduled Days' to **4**.")
             else:
@@ -324,30 +346,30 @@ if Customer_Country in country_coords and Order_Country in country_coords:
 
     layer_points = pdk.Layer(
         "ScatterplotLayer",
-        data=map_data,
-        get_position='[lon, lat]',
-        get_radius=250000,
-        get_fill_color='[0,102,255]'
+        data= map_data,
+        get_position= '[lon, lat]',
+        get_radius= 7000,
+        get_fill_color= '[204, 164, 101]'
     )
     layer_arc = pdk.Layer(
         "ArcLayer",
-        data=arc,
-        get_source_position='[start_lon,start_lat]',
-        get_target_position='[end_lon,end_lat]',
-        get_source_color=[0,150,255],
-        get_target_color=[255,100,0],
-        get_width=6
+        data= arc,
+        get_source_position= '[start_lon,start_lat]',
+        get_target_position= '[end_lon,end_lat]',
+        get_source_color= [204, 164, 101],
+        get_target_color= [204, 164, 101],
+        get_width= 5
     )
     view_state = pdk.ViewState(
-        latitude=(origin[1]+destination[1])/2,
-        longitude=(origin[0]+destination[0])/2,
+        latitude= (origin[1]+destination[1])/2,
+        longitude= (origin[0]+destination[0])/2,
         zoom= 1
     )
     st.pydeck_chart(
         pdk.Deck(
-            layers=[layer_arc, layer_points],
-            initial_view_state=view_state,
-            map_style="https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
+            layers= [layer_arc, layer_points],
+            initial_view_state= view_state,
+            map_style= "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json"
         )
     )
 
